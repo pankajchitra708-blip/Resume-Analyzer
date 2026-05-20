@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Resume Analyzer & Builder</title>
+
+<style>
+:root {
+    --bg-gradient-1: #020617;
+    --bg-gradient-2: #0f172a;
+    --bg-gradient-3: #1e293b;
+    --card-bg: rgba(255, 255, 255, 0.12);
+    --card-border: rgba(255, 255, 255, 0.2);
+    --card-hover-bg: rgba(255, 255, 255, 0.15);
+    --text-primary: white;
+    --text-secondary: #cbd5f5;
+    --text-tertiary: #64748b;
+    --header-cyan: #06b6d4;
+    --header-blue: #3b82f6;
+    --header-green: #22c55e;
+    --accent-purple-1: #8b5cf6;
+    --accent-purple-2: #ec4899;
+}
+
+[data-theme="light"] {
+    --bg-gradient-1: #f8fafc;
+    --bg-gradient-2: #e2e8f0;
+    --bg-gradient-3: #cbd5e1;
+    --card-bg: rgba(255, 255, 255, 0.8);
+    --card-border: rgba(0, 0, 0, 0.1);
+    --card-hover-bg: rgba(255, 255, 255, 0.95);
+    --text-primary: #1e293b;
+    --text-secondary: #334155;
+    --text-tertiary: #64748b;
+}
+
+/* Animated Background */
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(-45deg, var(--bg-gradient-1), var(--bg-gradient-2), var(--bg-gradient-3), var(--bg-gradient-1));
+    background-size: 400% 400%;
+    animation: bgMove 10s infinite alternate;
+    color: var(--text-primary);
+    overflow-x: hidden;
+    padding-bottom: 80px;
+}
+
+@keyframes bgMove {
+    0% {background-position: 0% 50%;}
+    100% {background-position: 100% 50%;}
+}
+
+/* Dark/Light mode transition */
+body, .card, .header h1, .header h2, .footer, .or-divider, .builder-features li, .footer span, .footer .tagline {
+    transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+/* HEADER PREMIUM */
+.header {
+    text-align: center;
+    padding: 30px 20px 10px;
+}
+
+.header h1 {
+    font-size: 55px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    background: linear-gradient(90deg,var(--header-cyan),var(--header-blue),var(--header-green));
+    background-size: 200%;
+    animation: shine 4s linear infinite;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 20px rgba(59,130,246,0.4);
+}
+
+.header h2 {
+    font-size: 22px;
+    color: var(--text-secondary);
+    letter-spacing: 1px;
+}
+
+@keyframes shine {
+    0% {background-position: 0%;}
+    100% {background-position: 200%;}
+}
+
+/* Theme Toggle Button */
+.theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 50px;
+    padding: 10px 16px;
+    color: var(--text-primary);
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+    z-index: 1000;
+    transition: 0.3s;
+    font-size: 14px;
+}
+
+.theme-toggle:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(139,92,246,0.4);
+}
+
+/* Gradient Bar */
+.gradient-bar {
+    height: 4px;
+    background: linear-gradient(90deg, #06b6d4, #22c55e, #3b82f6);
+    margin: 20px 0;
+}
+
+/* Container — side by side cards */
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+    min-height: 70vh;
+    flex-wrap: wrap;
+    padding: 20px;
+    position: relative;
+}
+
+/* Card */
+.card {
+    background: linear-gradient(
+        135deg,
+        var(--card-bg),
+        rgba(255, 255, 255, 0.05)
+    );
+    border: 1px solid var(--card-border);
+    padding: 35px;
+    border-radius: 20px;
+    width: 320px;
+    text-align: center;
+    backdrop-filter: blur(20px);
+    box-shadow: 
+        0 8px 32px rgba(0,0,0,0.4),
+        inset 0 1px 1px rgba(255,255,255,0.15);
+    transition: 0.4s;
+    position: relative;
+    z-index: 2;
+}
+
+.card::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: 20px;
+    background: linear-gradient(90deg,#06b6d4,#22c55e,#3b82f6);
+    z-index: -1;
+    filter: blur(8px);
+    opacity: 0.3;
+}
+
+.card:hover {
+    transform: translateY(-12px) scale(1.04);
+    background: var(--card-hover-bg);
+}
+
+/* Builder card — purple accent */
+.card.builder-card::before {
+    background: linear-gradient(90deg,#8b5cf6,#ec4899,#06b6d4);
+}
+
+/* Highlight */
+.highlight {
+    background: linear-gradient(90deg, #06b6d4, #22c55e, #3b82f6);
+    background-size: 200%;
+    animation: textMove 3s infinite linear;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: bold;
+}
+
+.highlight-purple {
+    background: linear-gradient(90deg, #8b5cf6, #ec4899, #06b6d4);
+    background-size: 200%;
+    animation: textMove 3s infinite linear;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: bold;
+}
+
+@keyframes textMove {
+    0% {background-position: 0%;}
+    100% {background-position: 200%;}
+}
+
+/* Upload Box */
+.upload-box {
+    border: 2px dashed var(--card-border);
+    background: rgba(255,255,255,0.03);
+    padding: 25px;
+    border-radius: 12px;
+}
+
+/* Builder Box */
+.builder-box {
+    border: 2px dashed rgba(139,92,246,0.5);
+    background: rgba(139,92,246,0.04);
+    padding: 25px;
+    border-radius: 12px;
+}
+
+.builder-icon {
+    font-size: 50px;
+    margin-bottom: 10px;
+    display: block;
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-8px); }
+}
+
+.builder-features {
+    list-style: none;
+    padding: 0;
+    margin: 14px 0;
+    text-align: left;
+}
+
+.builder-features li {
+    font-size: 13px;
+    color: #cbd5e1;
+    padding: 5px 0;
+}
+
+/* Choose File Button */
+.btn-choose {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 45px;
+    margin-top: 12px;
+    background: linear-gradient(90deg, #06b6d4, #3b82f6);
+    border: none;
+    color: white;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 500;
+    position: relative;
+    overflow: hidden;
+    transition: 0.3s;
+    box-sizing: border-box;
+}
+
+.btn-choose::after {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(120deg, transparent, rgba(255,255,255,0.4), transparent);
+    transform: translateX(-100%);
+}
+
+.btn-choose:hover::after {
+    transform: translateX(100%);
+    transition: 0.6s;
+}
+
+.btn-choose:hover { transform: scale(1.05); }
+
+/* Upload Button — INACTIVE by default */
+.btn-upload {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 45px;
+    margin-top: 12px;
+    border: none;
+    color: rgba(255,255,255,0.4);
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 500;
+    position: relative;
+    overflow: hidden;
+    box-sizing: border-box;
+    transition: 0.4s;
+    background: linear-gradient(90deg, #0e4a57, #1a3a6b);
+    cursor: not-allowed;
+    filter: blur(0.6px);
+    opacity: 0.5;
+    box-shadow: none;
+}
+
+.btn-upload.active {
+    background: linear-gradient(90deg, #06b6d4, #3b82f6);
+    color: white;
+    cursor: pointer;
+    filter: none;
+    opacity: 1;
+    box-shadow: 0 0 15px rgba(0,200,255,0.4);
+}
+
+.btn-upload.active::after {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(120deg, transparent, rgba(255,255,255,0.4), transparent);
+    transform: translateX(-100%);
+}
+
+.btn-upload.active:hover::after {
+    transform: translateX(100%);
+    transition: 0.6s;
+}
+
+.btn-upload.active:hover { transform: scale(1.05); }
+
+/* Builder CTA Button */
+.btn-builder {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 48px;
+    margin-top: 16px;
+    background: linear-gradient(90deg, #8b5cf6, #ec4899);
+    border: none;
+    color: white;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 600;
+    position: relative;
+    overflow: hidden;
+    transition: 0.3s;
+    box-sizing: border-box;
+    text-decoration: none;
+    box-shadow: 0 0 15px rgba(139,92,246,0.4);
+    letter-spacing: 0.5px;
+}
+
+.btn-builder::after {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(120deg, transparent, rgba(255,255,255,0.35), transparent);
+    transform: translateX(-100%);
+}
+
+.btn-builder:hover::after {
+    transform: translateX(100%);
+    transition: 0.6s;
+}
+
+.btn-builder:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 25px rgba(236,72,153,0.6);
+}
+
+/* OR Divider */
+.or-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 8px;
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 2px;
+}
+
+.or-divider::before,
+.or-divider::after {
+    content: "";
+    width: 1px;
+    height: 60px;
+    background: linear-gradient(to bottom, transparent, #334155, transparent);
+}
+
+/* Error Message */
+.error-msg {
+    display: none;
+    margin-top: 10px;
+    padding: 10px 14px;
+    background: rgba(255, 50, 50, 0.15);
+    border: 1px solid rgba(255, 80, 80, 0.5);
+    border-radius: 8px;
+    color: #ff8080;
+    font-size: 13px;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* File name display */
+.file-name-display {
+    margin-top: 10px;
+    font-size: 12px;
+    color: #22c55e;
+    min-height: 18px;
+    transition: 0.3s;
+}
+
+input[type="file"] { display: none; }
+
+/* Footer */
+.footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background: linear-gradient(135deg, #667eea, #2aaeb5);
+    text-align: center;
+    padding: 12px;
+    font-family: 'Segoe UI', sans-serif;
+    box-shadow: 0px -3px 15px rgba(0,0,0,0.3);
+    z-index: 1000;
+}
+
+.footer p { margin: 3px 0; color: white; }
+.footer span { font-weight: bold; color: #ffd369; }
+.footer .tagline { font-size: 12px; opacity: 0.8; letter-spacing: 1px; }
+.footer:hover { background: linear-gradient(135deg, #764ba2, #667eea); transition: 0.5s; }
+
+</style>
+<link rel="stylesheet" href="{{ url_for('static', filename='theme.css') }}">
+</head>
+
+<body>
+
+<button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">🌙 Dark Mode</button>
+
+<div class="header">
+    <h1>AI Based Resume Analyzer &amp; Builder</h1>
+</div>
+
+<div class="gradient-bar hero-divider" aria-label="AI Based Resume Analyzer and Builder description">
+    <div class="divider-track">
+        <span>AI Based Resume Analyzer &amp; Builder helps users analyze, improve, and create professional resumes using AI.</span>
+        <span>AI Based Resume Analyzer &amp; Builder helps users analyze, improve, and create professional resumes using AI.</span>
+    </div>
+</div>
+
+<div class="container">
+
+    <!-- ══ ANALYZER CARD ══ -->
+    <div class="card">
+        <h3>
+            Analyze Your Resume With 
+            <span class="highlight">AI Powered Insights</span>
+        </h3>
+
+        <form id="resumeForm" action="/upload" method="POST" enctype="multipart/form-data">
+            <div class="upload-box">
+                <p>Upload Your Resume</p>
+                <p>(PDF &amp; DOCX allowed)</p>
+
+                <label class="btn-choose" id="fileLabel">
+                    📂 Choose File
+                    <input type="file" id="fileInput" name="resume" accept=".pdf,.doc,.docx" required>
+                </label>
+
+                <div class="file-name-display" id="fileNameDisplay">No file selected</div>
+
+                <div class="error-msg" id="errorMsg">
+                    ⚠️ Please select a file first before uploading!
+                </div>
+
+                <button type="button" class="btn-upload" id="uploadBtn">
+                    🚀 Upload &amp; Analyze
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- ══ OR DIVIDER ══ -->
+    <div class="or-divider">OR</div>
+
+    <!-- ══ BUILDER CARD ══ -->
+    <div class="card builder-card">
+        <h3>
+            Build a New Resume With
+            <span class="highlight-purple">AI Generation</span>
+        </h3>
+
+        <div class="builder-box">
+            <span class="builder-icon">✨</span>
+
+            <ul class="builder-features">
+                
+                <li>✍️  fill the form manually</li>
+                <li>📄 Download as PDF instantly</li>
+                
+                <li>💼 Job-ready in minutes</li>
+            </ul>
+
+            <a href="/builder" class="btn-builder">
+                 Build My Resume
+            </a>
+        </div>
+    </div>
+
+</div>
+
+<footer class="footer">
+    <div>
+        <p>🚀 Developed with ❤️ by <span>Kirandeep Kaur</span></p>
+        <p class="tagline">AI Resume Analyzer &amp; Builder • Smart Career Insights</p>
+    </div>
+</footer>
+
+<script>
+    // Theme toggle functionality
+    function toggleTheme() {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        const toggleBtn = document.getElementById('themeToggle');
+        toggleBtn.textContent = newTheme === 'light' ? '🌙 Dark Mode' : '☀️ Light Mode';
+    }
+
+    // Load saved theme on page load
+    window.onload = function() {
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        const toggleBtn = document.getElementById('themeToggle');
+        toggleBtn.textContent = savedTheme === 'light' ? '🌙 Dark Mode' : '☀️ Light Mode';
+    }
+
+    const fileInput       = document.getElementById('fileInput');
+    const fileLabel       = document.getElementById('fileLabel');
+    const uploadBtn       = document.getElementById('uploadBtn');
+    const errorMsg        = document.getElementById('errorMsg');
+    const fileNameDisplay = document.getElementById('fileNameDisplay');
+    const resumeForm      = document.getElementById('resumeForm');
+
+    fileInput.addEventListener('change', function () {
+        if (this.files.length > 0) {
+            uploadBtn.classList.add('active');
+            fileNameDisplay.textContent = '✅ ' + this.files[0].name;
+            errorMsg.style.display = 'none';
+            fileLabel.childNodes[0].nodeValue = '📂 ';
+        } else {
+            uploadBtn.classList.remove('active');
+            fileNameDisplay.textContent = 'No file selected';
+        }
+    });
+
+    uploadBtn.addEventListener('click', function () {
+        if (!uploadBtn.classList.contains('active')) {
+            errorMsg.style.display = 'block';
+            setTimeout(() => { errorMsg.style.display = 'none'; }, 3000);
+        } else {
+            errorMsg.style.display = 'none';
+            resumeForm.submit();
+        }
+    });
+</script>
+<script src="{{ url_for('static', filename='theme.js') }}"></script>
+
+</body>
+</html>

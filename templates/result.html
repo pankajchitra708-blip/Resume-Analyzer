@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>AI Resume Analyzer</title>
+
+<style>
+:root {
+    --bg-gradient-1: #020617;
+    --bg-gradient-2: #0f172a;
+    --bg-gradient-3: #1e293b;
+    --text-primary: white;
+    --text-secondary: #e0f2fe;
+    --text-tertiary: #94a3b8;
+    --card-bg: rgba(255,255,255,0.06);
+    --cyan: cyan;
+    --blue: blue;
+}
+
+[data-theme="light"] {
+    --bg-gradient-1: #f8fafc;
+    --bg-gradient-2: #e2e8f0;
+    --bg-gradient-3: #cbd5e1;
+    --text-primary: #1e293b;
+    --text-secondary: #1e293b;
+    --text-tertiary: #64748b;
+    --card-bg: rgba(255,255,255,0.8);
+    --cyan: #0891b2;
+    --blue: #2563eb;
+}
+
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg,var(--bg-gradient-1),var(--bg-gradient-2),var(--bg-gradient-3));
+    color: var(--text-primary);
+    padding-bottom: 80px;
+    transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+/* Theme Toggle */
+.theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: var(--card-bg);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 50px;
+    padding: 10px 16px;
+    color: var(--text-primary);
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+    z-index: 1000;
+    transition: 0.3s;
+}
+
+.theme-toggle:hover {
+    transform: scale(1.05);
+}
+
+/* HEADER */
+.header {
+    text-align: center;
+    padding: 30px;
+    font-size: 28px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    color: var(--cyan);
+}
+
+/* CONTAINER */
+.container {
+    width: 90%;
+    margin: auto;
+}
+
+/* CARD */
+.card {
+    background: var(--card-bg);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    padding: 20px;
+    margin: 15px 0;
+    box-shadow: 0 0 20px rgba(0,255,255,0.15);
+    transition: 0.3s;
+    color: var(--text-primary);
+}
+
+.card:hover {
+    transform: scale(1.02);
+    box-shadow: 0 0 30px var(--cyan);
+}
+
+/* TOP CARD */
+.top {
+    border: 2px solid var(--cyan);
+}
+
+/* SCORE */
+.score-box {
+    display: flex;
+    justify-content: space-around;
+    margin: 20px 0;
+}
+
+.score {
+    font-size: 22px;
+    background: rgba(0,255,255,0.1);
+    padding: 15px;
+    border-radius: 10px;
+}
+
+/* PROGRESS BAR */
+.progress {
+    background: var(--bg-gradient-3);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 10px;
+}
+
+.progress-bar {
+    height: 10px;
+    background: linear-gradient(90deg, var(--cyan), var(--blue));
+}
+
+/* BUTTON */
+.btn {
+    background: linear-gradient(90deg, var(--cyan), var(--blue));
+    padding: 8px 15px;
+    border-radius: 8px;
+    border: none;
+    color: white;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+/* POPUP */
+.popup {
+    display: none;
+    margin-top: 10px;
+    padding: 10px;
+    background: #111827;
+    border-radius: 10px;
+}
+
+/* SECTION TITLE */
+.section-title {
+    margin-top: 30px;
+    font-size: 22px;
+    color: var(--cyan);
+}
+
+/* SUGGESTION BOX */
+.suggestion-box {
+    position: relative;
+    background: linear-gradient(135deg, rgba(0,255,255,0.08), rgba(0,0,255,0.08));
+    border-left: 5px solid var(--cyan);
+    padding: 20px;
+    border-radius: 12px;
+    overflow: hidden;
+    animation: glow 2s infinite alternate;
+}
+
+@keyframes glow {
+    from { box-shadow: 0 0 10px rgba(0,255,255,0.2); }
+    to   { box-shadow: 0 0 25px rgba(0,255,255,0.6); }
+}
+
+.suggestion-title {
+    font-size: 18px;
+    color: var(--cyan);
+    margin-bottom: 10px;
+}
+
+.suggestion-box pre {
+    background: transparent;
+    padding: 0;
+    color: var(--text-secondary);
+    font-size: 14px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.suggestion-box::before {
+    content: "💡";
+    position: absolute;
+    top: -10px;
+    right: 10px;
+    font-size: 40px;
+    opacity: 0.2;
+}
+
+.suggestion-line {
+    padding: 8px 12px;
+    margin: 6px 0;
+    border-radius: 8px;
+    background: rgba(0,255,255,0.05);
+    transition: 0.3s;
+}
+
+.suggestion-line:hover {
+    background: rgba(0,255,255,0.15);
+    transform: translateX(5px);
+}
+
+.suggestion-heading {
+    color: var(--cyan);
+    font-weight: bold;
+    margin-top: 15px;
+}
+
+/* DOWNLOAD SECTION */
+.download-section {
+    text-align: center;
+    margin-top: 40px;
+}
+
+.download-btn {
+    position: relative;
+    padding: 12px 25px;
+    font-size: 16px;
+    border-radius: 30px;
+    border: none;
+    cursor: pointer;
+    color: white;
+    background: linear-gradient(90deg, #00f5ff, #007bff);
+    box-shadow: 0 0 15px rgba(0,255,255,0.5);
+    transition: 0.3s;
+    overflow: hidden;
+}
+
+.download-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 25px var(--cyan);
+}
+
+.download-btn::before {
+    content: "";
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(120deg, transparent, rgba(255,255,255,0.4), transparent);
+    transition: 0.5s;
+}
+
+.download-btn:hover::before { left: 100%; }
+
+.download-btn span { margin-left: 8px; transition: 0.3s; }
+.download-btn:hover span { transform: translateY(3px); }
+
+.download-text { margin-top: 10px; font-size: 13px; color: #94a3b8; }
+
+.upload-btn {
+    margin-left: 15px;
+    padding: 12px 25px;
+    font-size: 16px;
+    border-radius: 30px;
+    border: none;
+    cursor: pointer;
+    color: white;
+    background: linear-gradient(90deg, #06b6d4, #3b82f6);
+    box-shadow: 0 0 15px rgba(0,255,255,0.4);
+    transition: 0.3s;
+    position: relative;
+    overflow: hidden;
+}
+
+.upload-btn:hover { transform: scale(1.05); box-shadow: 0 0 30px var(--cyan); }
+
+.upload-btn::before {
+    content: "";
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(120deg, transparent, rgba(255,255,255,0.4), transparent);
+    transition: 0.5s;
+}
+
+.upload-btn:hover::before { left: 100%; }
+.upload-btn span { margin-left: 8px; transition: 0.3s; }
+.upload-btn:hover span { transform: rotate(180deg); }
+
+/* FOOTER */
+.footer {
+    position: fixed;
+    bottom: 0; left: 0;
+    width: 100%;
+    background: linear-gradient(135deg, #667eea, #2aaeb5);
+    color: white;
+    text-align: center;
+    padding: 12px 10px;
+    font-family: 'Segoe UI', sans-serif;
+    box-shadow: 0px -3px 15px rgba(0,0,0,0.3);
+    z-index: 1000;
+}
+
+.footer-content p { margin: 3px 0; }
+.footer span { font-weight: bold; color: #ffd369; }
+.footer .tagline { font-size: 12px; opacity: 0.8; letter-spacing: 1px; }
+.footer:hover { background: linear-gradient(135deg, #764ba2, #667eea); transition: 0.5s; }
+
+/* =============================================
+   🔥 HORIZONTAL COLOR-CODED SKILL BADGES
+   ============================================= */
+.skills-grid {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 12px;
+    align-items: flex-start;
+    width: 100%;
+}
+
+.skill-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: 0.25s;
+    cursor: default;
+}
+
+.skill-badge:hover {
+    transform: translateY(-3px) scale(1.07);
+    filter: brightness(1.2);
+}
+
+/* Domain badge colors */
+.badge-it      { background: rgba(14,165,233,0.18);  border: 1px solid rgba(14,165,233,0.6);  color: #38bdf8; }
+.badge-ds      { background: rgba(139,92,246,0.18);  border: 1px solid rgba(139,92,246,0.6);  color: #c084fc; }
+.badge-medical { background: rgba(239,68,68,0.18);   border: 1px solid rgba(239,68,68,0.6);   color: #f87171; }
+.badge-law     { background: rgba(245,158,11,0.18);  border: 1px solid rgba(245,158,11,0.6);  color: #fbbf24; }
+.badge-finance { background: rgba(34,197,94,0.18);   border: 1px solid rgba(34,197,94,0.6);   color: #4ade80; }
+.badge-design  { background: rgba(236,72,153,0.18);  border: 1px solid rgba(236,72,153,0.6);  color: #f472b6; }
+.badge-engg    { background: rgba(249,115,22,0.18);  border: 1px solid rgba(249,115,22,0.6);  color: #fb923c; }
+.badge-edu     { background: rgba(20,184,166,0.18);  border: 1px solid rgba(20,184,166,0.6);  color: #2dd4bf; }
+.badge-mkt     { background: rgba(99,102,241,0.18);  border: 1px solid rgba(99,102,241,0.6);  color: #818cf8; }
+.badge-sci     { background: rgba(16,185,129,0.18);  border: 1px solid rgba(16,185,129,0.6);  color: #34d399; }
+.badge-gen     { background: rgba(148,163,184,0.18); border: 1px solid rgba(148,163,184,0.6); color: #cbd5e1; }
+
+/* Badge Legend */
+.badge-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    color: #94a3b8;
+}
+
+.legend-dot {
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+</style>
+<link rel="stylesheet" href="{{ url_for('static', filename='theme.css') }}">
+
+<script>
+function toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    const toggleBtn = document.getElementById('themeToggle');
+    if (toggleBtn) {
+        toggleBtn.textContent = newTheme === 'light' ? '🌙 Dark Mode' : '☀️ Light Mode';
+    }
+}
+
+window.onload = function() {
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+}
+
+function togglePopup(id){
+    let el = document.getElementById(id);
+    el.style.display = (el.style.display === "block") ? "none" : "block";
+}
+</script>
+
+</head>
+<body>
+
+<button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">☀️ Light Mode</button>
+
+<div class="header">AI Resume Analyzer</div>
+
+<div class="container">
+
+    <!-- BASIC INFO -->
+    <div class="card">
+        <h3>👤 Basic Information</h3>
+        <p><b>Name:</b> {{ name }}</p>
+        <p><b>📧 Email:</b> {{ email }}</p>
+        <p><b>📱 Phone:</b> {{ phone }}</p>
+    </div>
+
+    <!-- SCORE CIRCLE -->
+    <div style="display:flex; justify-content:center; align-items:center; gap:30px; flex-wrap:wrap; margin: 25px 0;">
+
+        <!-- Animated Score Circle -->
+        <div style="display:flex; flex-direction:column; align-items:center; gap:10px;">
+            <div style="position:relative; width:150px; height:150px;">
+                <svg width="150" height="150" viewBox="0 0 150 150">
+                    <!-- Background circle -->
+                    <circle cx="75" cy="75" r="60"
+                        fill="none"
+                        stroke="rgba(255,255,255,0.06)"
+                        stroke-width="12"/>
+                    <!-- Score arc -->
+                    <circle cx="75" cy="75" r="60"
+                        fill="none"
+                        stroke="url(#scoreGrad)"
+                        stroke-width="12"
+                        stroke-linecap="round"
+                        stroke-dasharray="376.99"
+                        stroke-dashoffset="{{ ((10 - score) / 10 * 376.99) | round(2) }}"
+                        transform="rotate(-90 75 75)"
+                        style="filter: drop-shadow(0 0 8px rgba(0,200,255,0.6)); transition: stroke-dashoffset 1s ease;"/>
+                    <defs>
+                        <linearGradient id="scoreGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%"   stop-color="#06b6d4"/>
+                            <stop offset="100%" stop-color="#3b82f6"/>
+                        </linearGradient>
+                    </defs>
+                    <!-- Score text -->
+                    <text x="75" y="68" text-anchor="middle"
+                          font-size="30" font-weight="800"
+                          fill="white" font-family="Segoe UI">{{ score }}</text>
+                    <text x="75" y="88" text-anchor="middle"
+                          font-size="12" fill="#94a3b8"
+                          font-family="Segoe UI">out of 10</text>
+                </svg>
+            </div>
+            <div style="font-size:13px; color:#94a3b8; letter-spacing:1px; text-transform:uppercase;">Resume Score</div>
+        </div>
+
+        <!-- Grade + Domain -->
+        <div style="display:flex; flex-direction:column; gap:14px;">
+            <div style="background:rgba(255,255,255,0.06); border:1px solid rgba(0,255,255,0.2); border-radius:14px; padding:14px 28px; text-align:center;">
+                <div style="font-size:11px; color:#94a3b8; letter-spacing:1px; text-transform:uppercase; margin-bottom:4px;">Grade</div>
+                <div style="font-size:32px; font-weight:800;
+                    {% if grade == 'A+' %}color:#22c55e;
+                    {% elif grade == 'A' %}color:#06b6d4;
+                    {% elif grade == 'B+' or grade == 'B' %}color:#3b82f6;
+                    {% elif grade == 'C' %}color:#f59e0b;
+                    {% else %}color:#ef4444;{% endif %}
+                ">{{ grade }}</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.06); border:1px solid rgba(0,255,255,0.2); border-radius:14px; padding:14px 28px; text-align:center;">
+                <div style="font-size:11px; color:#94a3b8; letter-spacing:1px; text-transform:uppercase; margin-bottom:4px;">Domain</div>
+                <div style="font-size:14px; font-weight:600; color:#06b6d4;">{{ domain }}</div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 🔥 SKILLS — HORIZONTAL COLOR BADGES -->
+    <div class="section-title">🧠 Detected Skills</div>
+
+    <div class="card">
+        <div class="skills-grid">
+
+            {% for skill in user_skills %}
+
+                {# Determine badge class based on skill #}
+                {% set s = skill | lower %}
+
+                {% if s in ['html','css','javascript','react','angular','vue','node.js','nodejs','express.js','express','python','java','c++','c#','php','typescript','flask','django','spring boot','mongodb','mysql','postgresql','sqlite','sql','git','github','docker','kubernetes','aws','azure','linux','bootstrap','rest api','graphql','redux','next.js','tailwind','tailwind css','firebase','kotlin','android','selenium','postman','oops','data structures','algorithms','operating system','computer networks','dbms','sass','jquery','wordpress','asp.net'] %}
+                    <span class="skill-badge badge-it">💻 {{ skill | title }}</span>
+
+                {% elif s in ['machine learning','deep learning','data analysis','data science','pandas','numpy','tensorflow','keras','pytorch','scikit-learn','sklearn','natural language processing','computer vision','power bi','tableau','r programming','big data','hadoop','apache spark','data mining','data visualization','opencv','matplotlib','seaborn'] %}
+                    <span class="skill-badge badge-ds">📊 {{ skill | title }}</span>
+
+                {% elif s in ['anatomy','physiology','pharmacology','patient care','clinical skills','medical diagnosis','surgery','nursing','first aid','icu care','ecg','radiology','pathology','medical coding','health informatics','mbbs','bds','ayurveda','homeopathy','biochemistry','pediatrics','gynecology','dentistry'] %}
+                    <span class="skill-badge badge-medical">🏥 {{ skill | title }}</span>
+
+                {% elif s in ['legal research','contract drafting','litigation','corporate law','criminal law','family law','intellectual property','taxation law','cyber law','constitutional law','legal writing','court proceedings','arbitration','mediation','llb','moot court'] %}
+                    <span class="skill-badge badge-law">⚖️ {{ skill | title }}</span>
+
+                {% elif s in ['accounting','financial analysis','tally','tally erp','gst','income tax','auditing','budgeting','financial reporting','balance sheet','investment banking','stock market','mutual funds','risk management','financial modeling','cfa','cpa','quickbooks','taxation','bookkeeping','ms excel'] %}
+                    <span class="skill-badge badge-finance">📈 {{ skill | title }}</span>
+
+                {% elif s in ['photoshop','adobe photoshop','illustrator','figma','adobe xd','canva','ui/ux','ui ux','graphic design','video editing','premiere pro','after effects','3d modeling','blender','motion graphics','brand design','indesign','corel draw','wireframing','prototyping'] %}
+                    <span class="skill-badge badge-design">🎨 {{ skill | title }}</span>
+
+                {% elif s in ['autocad','solidworks','matlab','ansys','staad pro','revit','structural analysis','construction management','mechanical design','thermodynamics','fluid mechanics','surveying','bim','catia','vlsi','plc','scada'] %}
+                    <span class="skill-badge badge-engg">🏗️ {{ skill | title }}</span>
+
+                {% elif s in ['lesson planning','curriculum development','classroom management','student assessment','e-learning','educational technology','special education','b.ed','ctet'] %}
+                    <span class="skill-badge badge-edu">📚 {{ skill | title }}</span>
+
+                {% elif s in ['digital marketing','seo','social media marketing','content writing','email marketing','google ads','facebook ads','brand management','market research','hr management','recruitment','payroll','performance management','employee relations','copywriting'] %}
+                    <span class="skill-badge badge-mkt">📣 {{ skill | title }}</span>
+
+                {% elif s in ['bioinformatics','scientific writing','hypothesis testing','biotechnology','microbiology','genetics'] %}
+                    <span class="skill-badge badge-sci">🔬 {{ skill | title }}</span>
+
+                {% else %}
+                    <span class="skill-badge badge-gen">🌐 {{ skill | title }}</span>
+                {% endif %}
+
+            {% endfor %}
+
+        </div>
+
+        <!-- Color Legend -->
+        <div class="badge-legend">
+            <span class="legend-item"><span class="legend-dot" style="background:#38bdf8;"></span>IT / Web</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#c084fc;"></span>Data Science</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#f87171;"></span>Medical</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#fbbf24;"></span>Law</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#4ade80;"></span>Finance</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#f472b6;"></span>Design</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#fb923c;"></span>Engineering</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#2dd4bf;"></span>Education</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#818cf8;"></span>Marketing/HR</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#34d399;"></span>Science</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#cbd5e1;"></span>General</span>
+        </div>
+    </div>
+
+    <!-- TOP JOBS — exactly same as original -->
+    <div class="section-title">🏆 Top Matches</div>
+
+    {% for job in top_jobs %}
+    <div class="card top">
+        <h3>{{ job.job }}</h3>
+        <div class="progress">
+            <div class="progress-bar" style="width: {{ job.match }}%"></div>
+        </div>
+        <p>Match: {{ job.match }}%</p>
+        {% if not job.is_full %}
+        <button class="btn" onclick="togglePopup('top{{ loop.index }}')">View Missing Skills</button>
+        <div id="top{{ loop.index }}" class="popup">
+            {% for skill in job.required %}
+            {% if skill in job.missing %}
+            <p>❌ {{ skill }}
+            <a href="https://www.youtube.com/results?search_query={{ skill }} tutorial" target="_blank">Learn</a></p>
+            {% else %}
+            <p>✅ {{ skill }}</p>
+            {% endif %}
+            {% endfor %}
+        </div>
+        {% else %}
+        <p>✅ Perfect Match</p>
+        {% endif %}
+    </div>
+    {% endfor %}
+
+    <!-- OTHER JOBS — exactly same as original -->
+    <div class="section-title">📋 Other Matches</div>
+
+    {% for job in other_jobs %}
+    <div class="card">
+        <h3>{{ job.job }}</h3>
+        <div class="progress">
+            <div class="progress-bar" style="width: {{ job.match }}%"></div>
+        </div>
+        <p>Match: {{ job.match }}%</p>
+        {% if not job.is_full %}
+        <button class="btn" onclick="togglePopup('job{{ loop.index }}')">View Missing Skills</button>
+        <div id="job{{ loop.index }}" class="popup">
+            {% for skill in job.required %}
+            {% if skill in job.missing %}
+            <p>❌ {{ skill }}
+            <a href="https://www.youtube.com/results?search_query={{ skill }} tutorial" target="_blank">Learn</a></p>
+            {% else %}
+            <p>✅ {{ skill }}</p>
+            {% endif %}
+            {% endfor %}
+        </div>
+        {% else %}
+        <p>✅ Perfect Match</p>
+        {% endif %}
+    </div>
+    {% endfor %}
+
+    <!-- SUGGESTIONS — exactly same as original -->
+    <div class="section-title">💡 Suggestions</div>
+
+    <div class="card suggestion-box">
+        <div class="suggestion-title">✨ Improve Your Resume</div>
+        <div>
+            {% for line in suggestion.split('\n') %}
+                {% if line.startswith('##') %}
+                    <div class="suggestion-heading">
+                        {{ line.replace('##', '') }}
+                    </div>
+                {% elif line.startswith('-') %}
+                    <div class="suggestion-line">
+                        ✅ {{ line[1:] }}
+                    </div>
+                {% elif line.strip() != "" %}
+                    <div class="suggestion-line">
+                        {{ line }}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+
+    <br>
+
+    <!-- DOWNLOAD SECTION — exactly same as original -->
+    <div class="download-section">
+        <a href="/download">
+            <button class="download-btn">
+                📄 Download AI Report <span>⬇️</span>
+            </button>
+        </a>
+        <a href="/">
+            <button class="upload-btn">
+                🔄 Upload New Resume <span>↺</span>
+            </button>
+        </a>
+        <div class="download-text">
+            Download your report or analyze a new resume
+        </div>
+    </div>
+
+</div>
+
+<footer class="footer">
+    <div class="footer-content">
+        <p>🚀 Developed with ❤️ by <span>Kirandeep Kaur</span></p>
+        <p class="tagline">AI Resume Analyzer • Smart Career Insights</p>
+    </div>
+</footer>
+
+<script src="{{ url_for('static', filename='theme.js') }}"></script>
+</body>
+</html>

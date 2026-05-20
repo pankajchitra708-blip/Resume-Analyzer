@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Resume Tool</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(-45deg, #020617, #0f172a, #1e293b, #020617);
+    background-size: 400% 400%;
+    animation: bgMove 10s infinite alternate;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+@keyframes bgMove {
+    0% {background-position: 0% 50%;}
+    100% {background-position: 100% 50%;}
+}
+
+.container {
+    text-align: center;
+}
+
+h1 {
+    font-size: 48px;
+    background: linear-gradient(90deg,#06b6d4,#3b82f6,#22c55e);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.button {
+    display: block;
+    width: 260px;
+    margin: 20px auto;
+    padding: 15px;
+    border-radius: 12px;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    background: linear-gradient(90deg,#06b6d4,#3b82f6);
+    color: white;
+    transition: 0.3s;
+}
+
+.button:hover {
+    transform: scale(1.05);
+}
+</style>
+<link rel="stylesheet" href="{{ url_for('static', filename='theme.css') }}">
+</head>
+
+<body>
+
+<div class="container">
+    <h1>AI Resume Tool</h1>
+
+    <a href="/analyze">
+        <button class="button">📄 Analyze Your Resume</button>
+    </a>
+
+    <a href="/builder">
+        <button class="button">✨ Build New Resume</button>
+    </a>
+</div>
+
+<script src="{{ url_for('static', filename='theme.js') }}"></script>
+</body>
+</html>

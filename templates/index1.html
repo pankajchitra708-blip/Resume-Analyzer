@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Resume Analyzer</title>
+
+<style>
+
+/* Animated Background */
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(-45deg, #020617, #0f172a, #1e293b, #020617);
+    background-size: 400% 400%;
+    animation: bgMove 10s infinite alternate;
+    color: white;
+    overflow-x: hidden;
+    padding-bottom: 80px;
+}
+
+@keyframes bgMove {
+    0% {background-position: 0% 50%;}
+    100% {background-position: 100% 50%;}
+}
+
+/* HEADER PREMIUM */
+.header {
+    text-align: center;
+    padding: 30px 20px 10px;
+}
+
+/* AI Text Premium */
+.header h1 {
+    font-size: 55px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    background: linear-gradient(90deg,#06b6d4,#3b82f6,#22c55e);
+    background-size: 200%;
+    animation: shine 4s linear infinite;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 20px rgba(59,130,246,0.4);
+}
+
+/* Subtitle */
+.header h2 {
+    font-size: 22px;
+    color: #cbd5f5;
+    letter-spacing: 1px;
+}
+
+@keyframes shine {
+    0% {background-position: 0%;}
+    100% {background-position: 200%;}
+}
+
+/* Gradient Bar */
+.gradient-bar {
+    height: 4px;
+    background: linear-gradient(90deg, #06b6d4, #22c55e, #3b82f6);
+    margin: 20px 0;
+}
+
+/* Container */
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 70vh;
+    position: relative;
+}
+
+/* Card */
+.card {
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.12),
+        rgba(255, 255, 255, 0.05)
+    );
+    border: 1px solid rgba(255,255,255,0.2);
+    padding: 35px;
+    border-radius: 20px;
+    width: 340px;
+    text-align: center;
+    backdrop-filter: blur(20px);
+    box-shadow: 
+        0 8px 32px rgba(0,0,0,0.4),
+        inset 0 1px 1px rgba(255,255,255,0.15);
+    transition: 0.4s;
+    position: relative;
+    z-index: 2;
+}
+
+.card::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: 20px;
+    background: linear-gradient(90deg,#06b6d4,#22c55e,#3b82f6);
+    z-index: -1;
+    filter: blur(8px);
+    opacity: 0.3;
+}
+
+.card:hover {
+    transform: translateY(-12px) scale(1.04);
+}
+
+/* Highlight */
+.highlight {
+    background: linear-gradient(90deg, #06b6d4, #22c55e, #3b82f6);
+    background-size: 200%;
+    animation: textMove 3s infinite linear;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: bold;
+}
+
+@keyframes textMove {
+    0% {background-position: 0%;}
+    100% {background-position: 200%;}
+}
+
+/* Upload Box */
+.upload-box {
+    border: 2px dashed rgba(255,255,255,0.35);
+    background: rgba(255,255,255,0.03);
+    padding: 25px;
+    border-radius: 12px;
+}
+
+/* Choose File Button — always active */
+.btn-choose {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 45px;
+    margin-top: 12px;
+    background: linear-gradient(90deg, #06b6d4, #3b82f6);
+    border: none;
+    color: white;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 500;
+    position: relative;
+    overflow: hidden;
+    transition: 0.3s;
+    box-sizing: border-box;
+}
+
+.btn-choose::after {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(120deg, transparent, rgba(255,255,255,0.4), transparent);
+    transform: translateX(-100%);
+}
+
+.btn-choose:hover::after {
+    transform: translateX(100%);
+    transition: 0.6s;
+}
+
+.btn-choose:hover {
+    transform: scale(1.05);
+}
+
+/* 🔥 Upload Button — INACTIVE by default */
+.btn-upload {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 45px;
+    margin-top: 12px;
+    border: none;
+    color: rgba(255,255,255,0.4);
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 500;
+    position: relative;
+    overflow: hidden;
+    box-sizing: border-box;
+    transition: 0.4s;
+
+    /* Inactive look — blurred gradient */
+    background: linear-gradient(90deg, #0e4a57, #1a3a6b);
+    cursor: not-allowed;
+    filter: blur(0.6px);
+    opacity: 0.5;
+    box-shadow: none;
+}
+
+/* 🔥 Upload Button — ACTIVE after file selected */
+.btn-upload.active {
+    background: linear-gradient(90deg, #06b6d4, #3b82f6);
+    color: white;
+    cursor: pointer;
+    filter: none;
+    opacity: 1;
+    box-shadow: 0 0 15px rgba(0,200,255,0.4);
+}
+
+.btn-upload.active::after {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(120deg, transparent, rgba(255,255,255,0.4), transparent);
+    transform: translateX(-100%);
+}
+
+.btn-upload.active:hover::after {
+    transform: translateX(100%);
+    transition: 0.6s;
+}
+
+.btn-upload.active:hover {
+    transform: scale(1.05);
+}
+
+/* 🔥 ERROR MESSAGE */
+.error-msg {
+    display: none;
+    margin-top: 10px;
+    padding: 10px 14px;
+    background: rgba(255, 50, 50, 0.15);
+    border: 1px solid rgba(255, 80, 80, 0.5);
+    border-radius: 8px;
+    color: #ff8080;
+    font-size: 13px;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* File name display */
+.file-name-display {
+    margin-top: 10px;
+    font-size: 12px;
+    color: #22c55e;
+    min-height: 18px;
+    transition: 0.3s;
+}
+
+input[type="file"] {
+    display: none;
+}
+
+/* Footer */
+.footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background: linear-gradient(135deg, #667eea, #2aaeb5);
+    text-align: center;
+    padding: 12px;
+    font-family: 'Segoe UI', sans-serif;
+    box-shadow: 0px -3px 15px rgba(0,0,0,0.3);
+    z-index: 1000;
+}
+
+.footer p {
+    margin: 3px 0;
+    color: white;
+}
+
+.footer span {
+    font-weight: bold;
+    color: #ffd369;
+}
+
+.footer .tagline {
+    font-size: 12px;
+    opacity: 0.8;
+    letter-spacing: 1px;
+}
+
+.footer:hover {
+    background: linear-gradient(135deg, #764ba2, #667eea);
+    transition: 0.5s;
+}
+
+</style>
+<link rel="stylesheet" href="{{ url_for('static', filename='theme.css') }}">
+</head>
+
+<body>
+
+<div class="header">
+    <h1>AI Based</h1>
+    <h2>Resume Analyzer</h2>
+</div>
+
+<div class="gradient-bar"></div>
+
+<div class="container">
+
+    <div class="card">
+        <h3>
+            Analyze Your Resume With 
+            <span class="highlight">AI Powered Insights</span>
+        </h3>
+
+        <form id="resumeForm" action="/upload" method="POST" enctype="multipart/form-data">
+
+            <div class="upload-box">
+                <p>Upload Your Resume</p>
+                <p>(PDF & DOCX allowed)</p>
+
+                <!-- Choose File Button -->
+                <label class="btn-choose" id="fileLabel">
+                    📂 Choose File
+                    <input type="file" id="fileInput" name="resume" accept=".pdf,.doc,.docx" required>
+                </label>
+
+                <!-- File name display -->
+                <div class="file-name-display" id="fileNameDisplay">
+                    No file selected
+                </div>
+
+                <!-- 🔥 Error Message -->
+                <div class="error-msg" id="errorMsg">
+                    ⚠️ Please select a file first before uploading!
+                </div>
+
+                <!-- Upload Button — starts INACTIVE -->
+                <button type="button" class="btn-upload" id="uploadBtn">
+                    🚀 Upload Resume
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+<footer class="footer">
+    <div>
+        <p>🚀 Developed with ❤️ by <span>Kirandeep Kaur</span></p>
+        <p class="tagline">AI Resume Analyzer • Smart Career Insights</p>
+    </div>
+</footer>
+
+<!-- 🔥 JavaScript -->
+<script>
+    const fileInput      = document.getElementById('fileInput');
+    const fileLabel      = document.getElementById('fileLabel');
+    const uploadBtn      = document.getElementById('uploadBtn');
+    const errorMsg       = document.getElementById('errorMsg');
+    const fileNameDisplay= document.getElementById('fileNameDisplay');
+    const resumeForm     = document.getElementById('resumeForm');
+
+    // ✅ When file is selected — activate upload button
+    fileInput.addEventListener('change', function () {
+        if (this.files.length > 0) {
+            const fileName = this.files[0].name;
+
+            // Activate upload button
+            uploadBtn.classList.add('active');
+
+            // Show file name in green
+            fileNameDisplay.textContent = '✅ ' + fileName;
+
+            // Hide error if it was shown
+            errorMsg.style.display = 'none';
+
+            // Update label text
+            fileLabel.childNodes[0].nodeValue = '📂 ';
+
+        } else {
+            // No file — deactivate
+            uploadBtn.classList.remove('active');
+            fileNameDisplay.textContent = 'No file selected';
+        }
+    });
+
+    // 🔥 Upload button click handler
+    uploadBtn.addEventListener('click', function () {
+        if (!uploadBtn.classList.contains('active')) {
+            // File NOT selected — show error
+            errorMsg.style.display = 'block';
+
+            // Auto hide error after 3 seconds
+            setTimeout(() => {
+                errorMsg.style.display = 'none';
+            }, 3000);
+
+        } else {
+            // File selected — submit form
+            errorMsg.style.display = 'none';
+            alert('Uploading resume... 🚀');
+            resumeForm.submit();
+        }
+    });
+</script>
+<script src="{{ url_for('static', filename='theme.js') }}"></script>
+
+</body>
+</html>

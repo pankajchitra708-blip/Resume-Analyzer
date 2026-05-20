@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Resume Builder — AI Resume Analyzer</title>
+
+<style>
+/* ── BASE ─────────────────────────────────────────── */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(-45deg, #020617, #0f172a, #1e293b, #020617);
+    background-size: 400% 400%;
+    animation: bgMove 10s infinite alternate;
+    color: white;
+    min-height: 100vh;
+    padding-bottom: 90px;
+}
+
+@keyframes bgMove {
+    0%   { background-position: 0% 50%; }
+    100% { background-position: 100% 50%; }
+}
+
+/* ── HEADER ──────────────────────────────────────── */
+.header {
+    text-align: center;
+    padding: 30px 20px 10px;
+}
+
+.header h1 {
+    font-size: 42px;
+    font-weight: 800;
+    background: linear-gradient(90deg, #06b6d4, #3b82f6, #22c55e);
+    background-size: 200%;
+    animation: shine 4s linear infinite;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.header p {
+    color: #94a3b8;
+    font-size: 15px;
+    margin-top: 6px;
+    letter-spacing: 0.5px;
+}
+
+@keyframes shine {
+    0%   { background-position: 0%; }
+    100% { background-position: 200%; }
+}
+
+.gradient-bar {
+    height: 4px;
+    background: linear-gradient(90deg, #06b6d4, #22c55e, #3b82f6);
+    margin: 16px 0 28px;
+}
+
+/* ── NAV TABS ─────────────────────────────────────── */
+.nav-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+    padding: 0 16px;
+}
+
+.nav-tab {
+    padding: 8px 20px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.05);
+    color: #94a3b8;
+    transition: 0.3s;
+    text-decoration: none;
+}
+
+.nav-tab:hover, .nav-tab.active {
+    background: linear-gradient(90deg, #06b6d4, #3b82f6);
+    border-color: transparent;
+    color: white;
+}
+
+/* ── MAIN CONTAINER ──────────────────────────────── */
+.container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 16px;
+}
+
+/* ── SECTION CARD ─────────────────────────────────── */
+.section-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(0,200,255,0.15);
+    border-radius: 16px;
+    padding: 24px 28px;
+    margin-bottom: 20px;
+    backdrop-filter: blur(10px);
+    transition: 0.3s;
+}
+
+.section-card:hover {
+    border-color: rgba(0,200,255,0.35);
+    box-shadow: 0 0 20px rgba(0,200,255,0.08);
+}
+
+/* Section heading */
+.sec-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #06b6d4;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    letter-spacing: 0.5px;
+}
+
+.sec-title::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(6,182,212,0.4), transparent);
+}
+
+/* ── GRID LAYOUTS ─────────────────────────────────── */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+
+@media (max-width: 600px) {
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+}
+
+/* ── FORM FIELDS ──────────────────────────────────── */
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.field label {
+    font-size: 12px;
+    color: #94a3b8;
+    font-weight: 500;
+    letter-spacing: 0.4px;
+}
+
+.field input,
+.field textarea,
+.field select {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 10px;
+    padding: 10px 14px;
+    color: white;
+    font-size: 14px;
+    font-family: 'Segoe UI', sans-serif;
+    outline: none;
+    transition: 0.25s;
+    width: 100%;
+}
+
+.field input::placeholder,
+.field textarea::placeholder {
+    color: #475569;
+}
+
+.field input:focus,
+.field textarea:focus,
+.field select:focus {
+    border-color: #06b6d4;
+    background: rgba(6,182,212,0.08);
+    box-shadow: 0 0 0 2px rgba(6,182,212,0.15);
+}
+
+.field textarea {
+    resize: vertical;
+    min-height: 80px;
+    line-height: 1.5;
+}
+
+/* ── REPEATABLE ENTRY (edu/exp/proj) ─────────────── */
+.entry-block {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 14px;
+}
+
+.entry-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #3b82f6;
+    margin-bottom: 12px;
+    letter-spacing: 0.5px;
+}
+
+/* ── SUBMIT BUTTON ────────────────────────────────── */
+.submit-wrap {
+    text-align: center;
+    margin-top: 10px;
+}
+
+.btn-build {
+    padding: 14px 40px;
+    font-size: 16px;
+    font-weight: 600;
+    border: none;
+    border-radius: 999px;
+    cursor: pointer;
+    color: white;
+    background: linear-gradient(90deg, #06b6d4, #3b82f6);
+    box-shadow: 0 0 20px rgba(6,182,212,0.35);
+    transition: 0.3s;
+    position: relative;
+    overflow: hidden;
+    letter-spacing: 0.5px;
+}
+
+.btn-build:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 30px rgba(6,182,212,0.55);
+}
+
+.btn-build::before {
+    content: "";
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(120deg, transparent, rgba(255,255,255,0.3), transparent);
+    transition: 0.5s;
+}
+
+.btn-build:hover::before { left: 100%; }
+
+.btn-note {
+    margin-top: 10px;
+    font-size: 12px;
+    color: #475569;
+}
+
+/* ── LOADING OVERLAY ──────────────────────────────── */
+#loadingOverlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(2,6,23,0.92);
+    z-index: 9999;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+}
+
+#loadingOverlay.show { display: flex; }
+
+.spinner {
+    width: 60px; height: 60px;
+    border: 4px solid rgba(255,255,255,0.08);
+    border-top-color: #06b6d4;
+    border-radius: 50%;
+    animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.loading-text {
+    font-size: 16px;
+    font-weight: 600;
+    background: linear-gradient(90deg, #06b6d4, #3b82f6);
+    background-size: 200%;
+    animation: shine 2s linear infinite;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* ── FOOTER ───────────────────────────────────────── */
+.footer {
+    position: fixed;
+    bottom: 0; left: 0;
+    width: 100%;
+    background: linear-gradient(135deg, #667eea, #2aaeb5);
+    text-align: center;
+    padding: 12px;
+    font-family: 'Segoe UI', sans-serif;
+    box-shadow: 0 -3px 15px rgba(0,0,0,0.3);
+    z-index: 1000;
+}
+
+.footer p   { margin: 2px 0; color: white; font-size: 13px; }
+.footer span { font-weight: bold; color: #ffd369; }
+.footer .tagline { font-size: 11px; opacity: 0.8; letter-spacing: 1px; }
+.footer:hover { background: linear-gradient(135deg, #764ba2, #667eea); transition: 0.5s; }
+
+/* ── REQUIRED STAR ────────────────────────────────── */
+.req { color: #f87171; margin-left: 2px; }
+</style>
+<link rel="stylesheet" href="{{ url_for('static', filename='theme.css') }}">
+</head>
+
+<body>
+
+<!-- Loading Overlay -->
+<div id="loadingOverlay">
+    <div class="spinner"></div>
+    <div class="loading-text">Building your resume PDF...</div>
+    <div style="font-size:13px; color:#64748b;">Please wait a moment ✨</div>
+</div>
+
+<!-- Header -->
+<div class="header">
+    <h1>📝 Resume Builder</h1>
+    <p>Fill in your details and download a professional resume PDF instantly</p>
+</div>
+
+<div class="gradient-bar"></div>
+
+<!-- Nav Tabs -->
+<div class="nav-tabs">
+    <a href="/" class="nav-tab">🔍 Analyze Resume</a>
+    <a href="/build" class="nav-tab active">📝 Build Resume</a>
+</div>
+
+<!-- Form -->
+<div class="container">
+<form action="/build_resume" method="POST" id="builderForm">
+
+    <!-- ── PERSONAL INFORMATION ── -->
+    <div class="section-card">
+        <div class="sec-title">👤 Personal Information</div>
+        <div class="grid-2" style="margin-bottom:14px;">
+            <div class="field">
+                <label>Full Name <span class="req">*</span></label>
+                <input type="text" name="name" placeholder="e.g. Kirandeep Kaur" required>
+            </div>
+            <div class="field">
+                <label>Job Title / Role</label>
+                <input type="text" name="job_title" placeholder="e.g. Frontend Developer">
+            </div>
+        </div>
+        <div class="grid-3" style="margin-bottom:14px;">
+            <div class="field">
+                <label>Phone <span class="req">*</span></label>
+                <input type="text" name="phone" placeholder="+91 9876543210" required>
+            </div>
+            <div class="field">
+                <label>Email <span class="req">*</span></label>
+                <input type="email" name="email" placeholder="you@gmail.com" required>
+            </div>
+            <div class="field">
+                <label>Location</label>
+                <input type="text" name="location" placeholder="Delhi, India">
+            </div>
+        </div>
+        <div class="grid-2">
+            <div class="field">
+                <label>LinkedIn URL</label>
+                <input type="text" name="linkedin" placeholder="linkedin.com/in/yourname">
+            </div>
+            <div class="field">
+                <label>GitHub / Portfolio URL</label>
+                <input type="text" name="github" placeholder="github.com/yourname">
+            </div>
+        </div>
+    </div>
+
+    <!-- ── CAREER OBJECTIVE ── -->
+    <div class="section-card">
+        <div class="sec-title">🎯 Career Objective</div>
+        <div class="field">
+            <label>Write a brief summary about yourself and your goals</label>
+            <textarea name="objective" rows="4"
+                placeholder="e.g. Motivated Computer Science graduate with strong skills in Python and Machine Learning, seeking a Data Analyst role to contribute to data-driven decision making..."></textarea>
+        </div>
+    </div>
+
+    <!-- ── SKILLS ── -->
+    <div class="section-card">
+        <div class="sec-title">🧠 Skills</div>
+        <div class="field">
+            <label>Enter your skills separated by commas <span class="req">*</span></label>
+            <textarea name="skills" rows="3"
+                placeholder="e.g. Python, Machine Learning, SQL, Pandas, NumPy, Power BI, Tableau, Data Analysis, Git" required></textarea>
+        </div>
+    </div>
+
+    <!-- ── EDUCATION ── -->
+    <div class="section-card">
+        <div class="sec-title">🎓 Education</div>
+
+        <div class="entry-block">
+            <div class="entry-label">Education 1</div>
+            <div class="grid-2" style="margin-bottom:10px;">
+                <div class="field">
+                    <label>Degree / Course <span class="req">*</span></label>
+                    <input type="text" name="edu_degree_1" placeholder="e.g. B.Tech Computer Science">
+                </div>
+                <div class="field">
+                    <label>University / School</label>
+                    <input type="text" name="edu_school_1" placeholder="e.g. Delhi University, Delhi">
+                </div>
+            </div>
+            <div class="grid-2">
+                <div class="field">
+                    <label>Year</label>
+                    <input type="text" name="edu_year_1" placeholder="e.g. 2020 – 2024">
+                </div>
+                <div class="field">
+                    <label>Percentage / CGPA</label>
+                    <input type="text" name="edu_grade_1" placeholder="e.g. 8.5 CGPA / 85%">
+                </div>
+            </div>
+        </div>
+
+        <div class="entry-block">
+            <div class="entry-label">Education 2</div>
+            <div class="grid-2" style="margin-bottom:10px;">
+                <div class="field">
+                    <label>Degree / Course</label>
+                    <input type="text" name="edu_degree_2" placeholder="e.g. Class 12th (PCM)">
+                </div>
+                <div class="field">
+                    <label>University / School</label>
+                    <input type="text" name="edu_school_2" placeholder="e.g. DAV Public School, Delhi">
+                </div>
+            </div>
+            <div class="grid-2">
+                <div class="field">
+                    <label>Year</label>
+                    <input type="text" name="edu_year_2" placeholder="e.g. 2020">
+                </div>
+                <div class="field">
+                    <label>Percentage / CGPA</label>
+                    <input type="text" name="edu_grade_2" placeholder="e.g. 88%">
+                </div>
+            </div>
+        </div>
+
+        <div class="entry-block">
+            <div class="entry-label">Education 3 (Optional)</div>
+            <div class="grid-2" style="margin-bottom:10px;">
+                <div class="field">
+                    <label>Degree / Course</label>
+                    <input type="text" name="edu_degree_3" placeholder="e.g. Class 10th">
+                </div>
+                <div class="field">
+                    <label>University / School</label>
+                    <input type="text" name="edu_school_3" placeholder="e.g. DAV Public School">
+                </div>
+            </div>
+            <div class="grid-2">
+                <div class="field">
+                    <label>Year</label>
+                    <input type="text" name="edu_year_3" placeholder="e.g. 2018">
+                </div>
+                <div class="field">
+                    <label>Percentage / CGPA</label>
+                    <input type="text" name="edu_grade_3" placeholder="e.g. 90%">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── EXPERIENCE ── -->
+    <div class="section-card">
+        <div class="sec-title">💼 Work Experience</div>
+
+        <div class="entry-block">
+            <div class="entry-label">Experience 1</div>
+            <div class="grid-2" style="margin-bottom:10px;">
+                <div class="field">
+                    <label>Job Title / Role</label>
+                    <input type="text" name="exp_role_1" placeholder="e.g. Frontend Developer Intern">
+                </div>
+                <div class="field">
+                    <label>Company Name</label>
+                    <input type="text" name="exp_company_1" placeholder="e.g. TechSoft Solutions, Delhi">
+                </div>
+            </div>
+            <div class="field" style="margin-bottom:10px;">
+                <label>Duration</label>
+                <input type="text" name="exp_period_1" placeholder="e.g. Jan 2024 – May 2024">
+            </div>
+            <div class="field">
+                <label>Key Responsibilities (one per line)</label>
+                <textarea name="exp_desc_1" rows="3"
+                    placeholder="Developed responsive web apps using React and Node.js&#10;Collaborated with team using Git and Agile&#10;Improved page load speed by 30%"></textarea>
+            </div>
+        </div>
+
+        <div class="entry-block">
+            <div class="entry-label">Experience 2 (Optional)</div>
+            <div class="grid-2" style="margin-bottom:10px;">
+                <div class="field">
+                    <label>Job Title / Role</label>
+                    <input type="text" name="exp_role_2" placeholder="e.g. Data Analyst">
+                </div>
+                <div class="field">
+                    <label>Company Name</label>
+                    <input type="text" name="exp_company_2" placeholder="e.g. ABC Corp, Mumbai">
+                </div>
+            </div>
+            <div class="field" style="margin-bottom:10px;">
+                <label>Duration</label>
+                <input type="text" name="exp_period_2" placeholder="e.g. Jun 2023 – Dec 2023">
+            </div>
+            <div class="field">
+                <label>Key Responsibilities (one per line)</label>
+                <textarea name="exp_desc_2" rows="3" placeholder="Enter responsibilities..."></textarea>
+            </div>
+        </div>
+
+        <div class="entry-block">
+            <div class="entry-label">Experience 3 (Optional)</div>
+            <div class="grid-2" style="margin-bottom:10px;">
+                <div class="field">
+                    <label>Job Title / Role</label>
+                    <input type="text" name="exp_role_3" placeholder="e.g. Teaching Assistant">
+                </div>
+                <div class="field">
+                    <label>Company Name</label>
+                    <input type="text" name="exp_company_3" placeholder="e.g. XYZ Institute">
+                </div>
+            </div>
+            <div class="field" style="margin-bottom:10px;">
+                <label>Duration</label>
+                <input type="text" name="exp_period_3" placeholder="e.g. 2022 – 2023">
+            </div>
+            <div class="field">
+                <label>Key Responsibilities (one per line)</label>
+                <textarea name="exp_desc_3" rows="3" placeholder="Enter responsibilities..."></textarea>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── PROJECTS ── -->
+    <div class="section-card">
+        <div class="sec-title">🚀 Projects</div>
+
+        <div class="entry-block">
+            <div class="entry-label">Project 1</div>
+            <div class="field" style="margin-bottom:10px;">
+                <label>Project Name</label>
+                <input type="text" name="proj_name_1" placeholder="e.g. AI Resume Analyzer">
+            </div>
+            <div class="field" style="margin-bottom:10px;">
+                <label>Description (one point per line)</label>
+                <textarea name="proj_desc_1" rows="3"
+                    placeholder="Built using Flask, Python and NLP&#10;Detects skills and matches job roles&#10;Generates PDF report automatically"></textarea>
+            </div>
+            <div class="field">
+                <label>Project Link (GitHub / Live)</label>
+                <input type="text" name="proj_link_1" placeholder="https://github.com/yourname/project">
+            </div>
+        </div>
+
+        <div class="entry-block">
+            <div class="entry-label">Project 2 (Optional)</div>
+            <div class="field" style="margin-bottom:10px;">
+                <label>Project Name</label>
+                <input type="text" name="proj_name_2" placeholder="e.g. E-Commerce Website">
+            </div>
+            <div class="field" style="margin-bottom:10px;">
+                <label>Description (one point per line)</label>
+                <textarea name="proj_desc_2" rows="3" placeholder="Enter project details..."></textarea>
+            </div>
+            <div class="field">
+                <label>Project Link</label>
+                <input type="text" name="proj_link_2" placeholder="https://...">
+            </div>
+        </div>
+
+        <div class="entry-block">
+            <div class="entry-label">Project 3 (Optional)</div>
+            <div class="field" style="margin-bottom:10px;">
+                <label>Project Name</label>
+                <input type="text" name="proj_name_3" placeholder="e.g. Weather App">
+            </div>
+            <div class="field" style="margin-bottom:10px;">
+                <label>Description (one point per line)</label>
+                <textarea name="proj_desc_3" rows="3" placeholder="Enter project details..."></textarea>
+            </div>
+            <div class="field">
+                <label>Project Link</label>
+                <input type="text" name="proj_link_3" placeholder="https://...">
+            </div>
+        </div>
+    </div>
+
+    <!-- ── CERTIFICATIONS ── -->
+    <div class="section-card">
+        <div class="sec-title">🏅 Certifications</div>
+        <div class="field">
+            <label>Enter certifications (one per line)</label>
+            <textarea name="certifications" rows="4"
+                placeholder="AWS Cloud Practitioner — Amazon&#10;Google Data Analytics — Coursera&#10;HubSpot Content Marketing — HubSpot Academy"></textarea>
+        </div>
+    </div>
+
+    <!-- ── LANGUAGES ── -->
+    <div class="section-card">
+        <div class="sec-title">🌐 Languages</div>
+        <div class="field">
+            <label>Languages you know</label>
+            <input type="text" name="languages"
+                placeholder="e.g. English (Fluent), Hindi (Native), Punjabi (Basic)">
+        </div>
+    </div>
+
+    <!-- ── SUBMIT ── -->
+    <div class="submit-wrap">
+        <button type="submit" class="btn-build" id="buildBtn">
+            📄 Generate &amp; Download Resume PDF
+        </button>
+        <p class="btn-note">Your resume will be downloaded as a PDF instantly</p>
+    </div>
+
+</form>
+</div>
+
+<!-- Footer -->
+<footer class="footer">
+    <div>
+        <p>🚀 Developed with ❤️ by <span>Kirandeep Kaur</span></p>
+        <p class="tagline">AI Resume Analyzer • Smart Career Insights</p>
+    </div>
+</footer>
+
+<script>
+// Show loading overlay on form submit
+document.getElementById('builderForm').addEventListener('submit', function(e) {
+    const name = document.querySelector('[name="name"]').value.trim();
+    const phone = document.querySelector('[name="phone"]').value.trim();
+    const email = document.querySelector('[name="email"]').value.trim();
+    const skills = document.querySelector('[name="skills"]').value.trim();
+
+    if (!name || !phone || !email || !skills) {
+        alert('⚠️ Please fill in all required fields (Name, Phone, Email, Skills)');
+        e.preventDefault();
+        return;
+    }
+
+    document.getElementById('loadingOverlay').classList.add('show');
+
+    // Hide overlay after 5 seconds (PDF should be downloaded by then)
+    setTimeout(() => {
+        document.getElementById('loadingOverlay').classList.remove('show');
+    }, 5000);
+});
+</script>
+<script src="{{ url_for('static', filename='theme.js') }}"></script>
+
+</body>
+</html>
